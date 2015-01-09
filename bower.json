@@ -1,0 +1,14 @@
+{
+  "name": "jquery.bracket",
+  "version": "1.0.1",
+  "main": "dist/jquery.bracket.min.js",
+  "ignore": [
+    "lib",
+    "src",
+    ".jshintrc",
+    "Gruntfile.js",
+    "README.md",
+    "config.rb",
+    "package.json"
+  ]
+}
