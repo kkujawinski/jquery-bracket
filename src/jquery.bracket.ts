@@ -35,6 +35,7 @@ interface Match {
   el: JQuery;
   id: number;
   round: any;
+  inverted: boolean;
   msgGettext: any;
   connectorCb: (cb: ConnectorProvider) => void;
   connect: (cb: ConnectorProvider) => void;
@@ -79,6 +80,7 @@ interface Bracket {
 interface MatchResult {
   a: TeamBlock;
   b: TeamBlock;
+  inverted: boolean;
 }
 
 interface DoneCallback {
@@ -93,6 +95,7 @@ interface Decorator {
 interface Options {
   el: JQuery;
   init: any;
+  inverted: boolean;
   gettext: any;
   save: (data: any, userData: any) => void;
   userData: any;
@@ -131,6 +134,7 @@ interface Options {
   }
 
   function teamsInResultOrder(match: MatchResult) {
+    var output;
     if (match.a.name === undefined) {
       return [match.b, match.a];
     } else if (match.b.name === undefined) {
@@ -138,9 +142,15 @@ interface Options {
     }
     if (isNumber(match.a.score) && isNumber(match.b.score)) {
       if (match.a.score > match.b.score)
-        return [match.a, match.b]
+        output = [match.a, match.b]
       else if (match.a.score < match.b.score)
-        return [match.b, match.a]
+        output = [match.b, match.a]
+      if (output) {
+        if (match.inverted) {
+          output = [output[1], output[0]]
+        }
+        return output
+      }
     }
     return []
   }
@@ -231,18 +241,24 @@ interface Options {
   function winnerBubbles(match: Match): boolean {
     var el = match.el
     var winner = el.find('.team.win')
-    winner.append('<div class="bubble">' + match.msgGettext('1st') + '</div>')
+    var _ = match.msgGettext
+    var extraClass = match.inverted ? ' inverted' : ''
+
+    winner.append('<div class="bubble' + extraClass + '">' + (match.inverted ? _('Last') : _('1st')) + '</div>')
     var loser = el.find('.team.lose')
-    loser.append('<div class="bubble">' + match.msgGettext('2nd') + '</div>')
+    loser.append('<div class="bubble' + extraClass + '">' + (match.inverted ? _('2nd to last') : _('2nd')) + '</div>')
     return true
   }
 
   function consolationBubbles(match: Match): boolean {
     var el = match.el
     var winner = el.find('.team.win')
-    winner.append('<div class="bubble third">' + match.msgGettext('3rd') + '</div>');
+    var _ = match.msgGettext;
+    var extraClass = match.inverted ? ' inverted' : ''
+
+    winner.append('<div class="bubble third' + extraClass + '">' +  (match.inverted ? _('3rd to last') : _('3rd')) + '</div>');
     var loser = el.find('.team.lose')
-    loser.append('<div class="bubble fourth">' + match.msgGettext('4th') + '</div>');
+    loser.append('<div class="bubble fourth' + extraClass + '">' + (match.inverted ? _('4st to last') : _('4th')) + '</div>');
     return true
   }
 
@@ -733,6 +749,7 @@ interface Options {
     var align = opts.dir === 'lr' ? 'right' : 'left'
     var resultIdentifier
     var msgGettext = function(x) { return x; }
+    var inverted = Boolean(opts.inverted);
 
     if (!opts)
       throw Error('Options not set')
@@ -784,7 +801,7 @@ interface Options {
 
     function mkMatch(round: Round, data: Array<TeamBlock>, idx: number,
                      results, renderCb: Function): Match {
-      var match: MatchResult = {a: data[0], b: data[1]}
+      var match: MatchResult = {a: data[0], b: data[1], inverted: inverted}
       function teamElement(round: number, team: TeamBlock, isReady: boolean) {
         var rId = resultIdentifier
         var sEl = $('<div class="score" data-resultid="result-' + rId + '"></div>')
@@ -942,6 +959,7 @@ interface Options {
         el: matchCon,
         id: idx,
         msgGettext: msgGettext,
+        inverted: inverted,
         round: function(): Round {
           return round
         },
