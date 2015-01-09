@@ -129,6 +129,11 @@ interface Options {
   }
 
   function teamsInResultOrder(match: MatchResult) {
+    if (match.a.name === undefined) {
+      return [match.b, match.a];
+    } else if (match.b.name === undefined) {
+      return [match.a, match.b];
+    }
     if (isNumber(match.a.score) && isNumber(match.b.score)) {
       if (match.a.score > match.b.score)
         return [match.a, match.b]
