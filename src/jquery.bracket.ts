@@ -35,6 +35,7 @@ interface Match {
   el: JQuery;
   id: number;
   round: any;
+  msgGettext: any;
   connectorCb: (cb: ConnectorProvider) => void;
   connect: (cb: ConnectorProvider) => void;
   winner: () => TeamBlock;
@@ -92,6 +93,7 @@ interface Decorator {
 interface Options {
   el: JQuery;
   init: any;
+  gettext: any;
   save: (data: any, userData: any) => void;
   userData: any;
   decorator: Decorator;
@@ -229,18 +231,18 @@ interface Options {
   function winnerBubbles(match: Match): boolean {
     var el = match.el
     var winner = el.find('.team.win')
-    winner.append('<div class="bubble">1st</div>')
+    winner.append('<div class="bubble">' + match.msgGettext('1st') + '</div>')
     var loser = el.find('.team.lose')
-    loser.append('<div class="bubble">2nd</div>')
+    loser.append('<div class="bubble">' + match.msgGettext('2nd') + '</div>')
     return true
   }
 
   function consolationBubbles(match: Match): boolean {
     var el = match.el
     var winner = el.find('.team.win')
-    winner.append('<div class="bubble third">3rd</div>')
+    winner.append('<div class="bubble third">' + match.msgGettext('3rd') + '</div>');
     var loser = el.find('.team.lose')
-    loser.append('<div class="bubble fourth">4th</div>')
+    loser.append('<div class="bubble fourth">' + match.msgGettext('4th') + '</div>');
     return true
   }
 
@@ -730,6 +732,7 @@ interface Options {
   var JqueryBracket = function(opts: Options) {
     var align = opts.dir === 'lr' ? 'right' : 'left'
     var resultIdentifier
+    var msgGettext = function(x) { return x; }
 
     if (!opts)
       throw Error('Options not set')
@@ -751,6 +754,9 @@ interface Options {
         ['', '']
       ],
         results: [] }
+
+    if (opts.gettext)
+      msgGettext = opts.gettext
 
     data = opts.init
 
@@ -935,6 +941,7 @@ interface Options {
       return {
         el: matchCon,
         id: idx,
+        msgGettext: msgGettext,
         round: function(): Round {
           return round
         },
